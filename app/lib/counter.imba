@@ -98,11 +98,6 @@ export default tag Counter
 		ai:center
 		c:var(--text)
 
-	css h1
-		fs:6xl
-	css h2
-		fs:5xl
-
 	css .score
 		m:0 p:0
 		c:var(--primary)
@@ -136,7 +131,7 @@ export default tag Counter
 			for data of haachama
 				<Haachama x=data.x y=data.y angle=data.angle icon=data.icon>
 
-		<h1.score> "{globalScore}"
-		<h2.score> "{personalScore}"
+		<h1[fs:48px].score> "{globalScore}"
+		<h2[fs:24px].score> "{personalScore}"
 		<button @click=increment> "HAACHAMA!"
 
