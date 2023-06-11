@@ -45,28 +45,8 @@ class Score
 	
 	def fetch
 		try
-			clearInterval #interval
-
 			const res = await window.fetch('/count')
-
-			const fps = 10
-			const frameRate = 1000 / fps
-
-			const prev = score
-			const next = await getCount(res)
-
-			if prev >= next
-				score = next
-				return
-
-			const step = (next - prev) / BigInt(fps) + 1n
-
-			#interval = setInterval(&, frameRate) do
-				if score >= next
-					clearInterval #interval
-				else
-					score += step
-					imba.commit!
+			updateCount await getCount(res)
 		catch e
 			console.error `Failed to fetch score: {e}`
 
@@ -76,9 +56,31 @@ class Score
 
 		try
 			const res = await window.fetch '/increment', { method: 'POST' }
-			score = await getCount(res)
+			updateCount await getCount(res)
 		catch e
 			console.error `Failed to increment score: {e}`
+		
+	def updateCount count
+		clearInterval #interval
+		
+		const fps = 10
+		const frameRate = 1000 / fps
+
+		const prev = score
+		const next = count
+
+		if prev >= next
+			score = next
+			return
+
+		const step = (next - prev) / BigInt(fps) + 1n
+
+		#interval = setInterval(&, frameRate) do
+			if score >= next
+				clearInterval #interval
+			else
+				score += step
+				imba.commit!
 
 export default tag Counter
 	score\Score = new Score(window.localStorage)
@@ -89,6 +91,7 @@ export default tag Counter
 
 		#timer = setInterval(&, 1000) do
 			await score.fetch!
+			imba.commit!
 	
 	def unmount
 		clearInterval(#timer)
