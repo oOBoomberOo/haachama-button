@@ -20,11 +20,13 @@ router.use express.json({ limit: '1kb' });
 router.get '/count', do(req, res)
 	const counters = await sql`SELECT count FROM counters WHERE id = {COUNTER_ID} LIMIT 1`
 	const count = counters..at(0)..count ?? 0
+	res.header 'Cache-Control', 'no-store'
 	res.json { count }
 
 router.post '/increment', limiter, do(req, res)
 	const counters = await sql`UPDATE counters SET count = count + 1 WHERE id = {COUNTER_ID} RETURNING count`
 	const count = counters..at(0)..count ?? 0
+	res.header 'Cache-Control', 'no-store'
 	res.json { count }
 
 export default router;
