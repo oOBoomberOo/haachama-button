@@ -1,4 +1,5 @@
 import Haachama from "./haachama";
+import Scoreboard from "./score"
 import * as player from "./player"
 
 def random(min, max)
@@ -44,8 +45,28 @@ class Score
 	
 	def fetch
 		try
+			clearInterval #interval
+
 			const res = await window.fetch('/count')
-			score = await getCount(res)
+
+			const fps = 10
+			const frameRate = 1000 / fps
+
+			const prev = score
+			const next = await getCount(res)
+
+			if prev >= next
+				score = next
+				return
+
+			const step = (next - prev) / BigInt(fps) + 1n
+
+			#interval = setInterval(&, frameRate) do
+				if score >= next
+					clearInterval #interval
+				else
+					score += step
+					imba.commit!
 		catch e
 			console.error `Failed to fetch score: {e}`
 
@@ -65,6 +86,12 @@ export default tag Counter
 	
 	def mount
 		await score.fetch()
+
+		#timer = setInterval(&, 1000) do
+			await score.fetch!
+	
+	def unmount
+		clearInterval(#timer)
 	
 	def increment
 		await score.increment!
@@ -119,19 +146,12 @@ export default tag Counter
 		bg:red7
 		transform:translateY(2px)
 	
-	formatter = Intl.NumberFormat('en-US', { })
-
-	get globalScore
-		formatter.format(score.score)
-	get personalScore
-		formatter.format(score.personal)
-	
 	<self[c@suspended: red4]>
 		<global>
 			for data of haachama
 				<Haachama x=data.x y=data.y angle=data.angle icon=data.icon>
 
-		<h1[fs:48px].score> "{globalScore}"
-		<h2[fs:24px].score> "{personalScore}"
+		<Scoreboard[fs:48px] bind=score.score>
+		<Scoreboard[fs:24px] bind=score.personal>
 		<button @click=increment> "HAACHAMA!"
 
