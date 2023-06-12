@@ -3,12 +3,9 @@ export tag MusicVideo
 	playlist = "PLoYeF62lpHeyw9s2nXXndZgROzNlVQojH"
 
 	css iframe
-		o:0.9 h:100% bd:none m:0 p:0
+		o:0.9 bd:none m:0 p:0
+		h:100%
 		w:100%
-
-	css iframe@md
-		w:auto
-		aspect-ratio: 16 / 9
 	
 	css .focused
 		o: 0.2

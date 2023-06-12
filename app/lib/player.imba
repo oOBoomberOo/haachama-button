@@ -1,7 +1,13 @@
 import Chooser from "random-seed-weighted-chooser";
 
 def item duration, weight\number, name, volume = 1, icon = null
-	{ name, duration, volume, icon, weight }
+	const makeAudio = do
+		const audio = new Audio(`/sounds/{name}`)
+		audio.volume = volume
+		audio
+
+	const image = `/avatar/{icon or "haachama"}`
+	{ name, duration, volume, icon, weight, makeAudio, image }
 
 export const pools = [
 	item 1.75, 0.15, "ame", 1.0, "ame"
@@ -22,11 +28,18 @@ export const pools = [
 	item 1.00, 0.10, "i_like_pepeloni"
 ]
 
+export def preload
+	await Promise.allSettled
+		for pool of pools
+			Promise.allSettled [
+				window.fetch `/sounds/{pool.name}`
+				window.fetch `/avatar/{pool.icon or "haachama"}`
+			]
+
 export def select
 	Chooser.chooseWeightedObject pools
 
 
 export def play item
-	const audio = new Audio(`/sounds/{item.name}`)
-	audio.volume = item.volume
+	const audio = item.makeAudio()
 	try await audio.play!

@@ -1,124 +1,50 @@
-import Haachama from "./haachama";
-import Scoreboard from "./score"
+import Haachama, { haachamaSet } from "./haachama";
+import DistributedCounter from "./distributed_counter"
+import store from "./store"
+
 import * as player from "./player"
 
-def random(min, max)
-	Math.random() * (max - min + 1) + min
+def parseCount response\Response
+	unless response.status is 200
+		const error = await response.text()
+		throw new Error(error)
 
-def wait(ms, fn)
-	setTimeout(fn, ms)
+	const data = await response.json()
+	BigInt(data.count)
 
-class Score
-	constructor storage, global = "global", personal = "personal"
-		#storage = storage
-		#globalKey = global
-		#personalKey = personal
+def fetcher
+	try
+		const res = await window.fetch '/count'
+		return await parseCount res
+	catch e
+		console.error `Failed to fetch score: {e}`
 
-	def setScore key, score = 0n
-		#storage.setItem key, score.toString()
-
-	def getScore key
-		const data = #storage.getItem(key)
-		
-		if data
-			BigInt(data)
-		else
-			0n
-	
-	def getCount response\Response
-		unless response.status is 200
-			const error = await response.text()
-			throw new Error(error)
-
-		const data = await response.json()
-		BigInt(data.count)
-
-	get score
-		getScore #globalKey
-	set score value
-		setScore #globalKey, value
-
-	get personal
-		getScore #personalKey
-	set personal value
-		setScore #personalKey, value
-	
-	def fetch
-		try
-			const res = await window.fetch('/count')
-			updateCount await getCount(res)
-		catch e
-			console.error `Failed to fetch score: {e}`
-
-	def increment
-		personal += 1n
-		score += 1n
-
-		try
-			const res = await window.fetch '/increment', { method: 'POST' }
-			updateCount await getCount(res)
-		catch e
-			console.error `Failed to increment score: {e}`
-		
-	def updateCount count
-		clearInterval #interval
-		
-		const fps = 10
-		const frameRate = 1000 / fps
-
-		const prev = score
-		const next = count
-
-		if prev >= next
-			score = next
-			return
-
-		const step = (next - prev) / BigInt(fps) + 1n
-
-		#interval = setInterval(&, frameRate) do
-			if score >= next
-				clearInterval #interval
-			else
-				score += step
-				imba.commit!
+def incrementer
+	try
+		const res = await window.fetch '/increment', { method: 'POST' }
+		return await parseCount res
+	catch e
+		console.error `Failed to increment score: {e}`
 
 export default tag Counter
-	score\Score = new Score(window.localStorage)
-	haachama = new Set()
+	personalScore = store "personal"
+	globalScore = store "global"
+
+	counter = new DistributedCounter 'global-counter', globalScore, fetcher, incrementer
+
+	haachama = haachamaSet()
 	
 	def mount
-		await score.fetch()
-
-		#timer = setInterval(&, 1000) do
-			await score.fetch!
-			imba.commit!
+		await counter.init!
+		await player.preload!
 	
 	def unmount
-		clearInterval(#timer)
+		counter.destroy!
 	
 	def increment
-		await score.increment!
-		const item = player.select!
-		addHaachama item
-	
-	def addHaachama item
-		const size = 256
-		const age = item.duration * 1000
-
-		const x = random(0, window.innerWidth - size)
-		const y = random(0, window.innerHeight - size)
-		const angle = random(0, 360)
-		const icon = item.icon or "haachama"
-
-		const data = { x, y, angle, icon }
-
-		haachama.add(data)
-
-		player.play(item)
-
-		wait age, do
-			haachama.delete(data)
-			imba.commit!
+		personalScore.value += 1n
+		await counter.increment!
+		haachama.add player.select!
 
 	
 	css ta:center
@@ -149,12 +75,20 @@ export default tag Counter
 		bg:red7
 		transform:translateY(2px)
 	
+	formatter = Intl.NumberFormat('en-US', { })
+	
+	css .scoreboard
+		m:0 p:0
+		c:var(--primary)
+		txs: 1px 1px var(--text), 1px -1px var(--text), -1px 1px var(--text), -1px -1px var(--text)
+
 	<self[c@suspended: red4]>
 		<global>
-			for data of haachama
-				<Haachama x=data.x y=data.y angle=data.angle icon=data.icon>
+			for { x, y, angle, icon } of haachama.content
+				<Haachama x=x y=y angle=angle icon=icon>
 
-		<Scoreboard[fs:48px] bind=score.score>
-		<Scoreboard[fs:24px] bind=score.personal>
+		<span.scoreboard[fs:48px]>
+			<span id="global-counter"> "{globalScore}"
+		<span.scoreboard[fs:24px]> "{personalScore}"
 		<button @click=increment> "HAACHAMA!"
 
