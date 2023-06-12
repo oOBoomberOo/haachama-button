@@ -20,12 +20,25 @@ tag App
 		d:grid
 		c:var(--text)
 		p:5px 15px
-		gtc:1fr 1fr 1fr
+		fs:12px
+		ji:center
+		.focus-btn gr:1
+		a c:var(--primary)
+
+	
+	css footer@md
+		gtc:1fr auto 1fr
 		gtr:auto
 		ai:center
 		ac:center
-	css footer a
-		c:var(--primary)
+		
+		.left-msg
+			js:start
+		.right-msg
+			js:end
+		.focus-btn
+			js:center
+			gr:unset
 	
 	css .counter
 		pos:absolute
@@ -43,12 +56,12 @@ tag App
 		<section.counter[pe:none]>
 			<Counter[zi:2 pe:all]>
 		<footer[zi:1]>
-			<span[js:start]>
+			<span.left-msg>
 				"Dedicated to our worldwide strongest idol: "
 				<a[pe:all] href="https://www.youtube.com/@AkaiHaato"> "Akai Haato"
 				" ❤️"
-			<FocusToggle[js:center] bind=focused>
-			<span[js:end]>
+			<FocusToggle.focus-btn bind=focused>
+			<span.right-msg>
 				"And thanks " 
 				<a href="https://twitter.com/walfieee/status/1343707337777946628"> "@Walfie" 
 				" for the illustration!"
