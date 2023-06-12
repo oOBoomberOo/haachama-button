@@ -88,7 +88,7 @@ export default tag Counter
 				<Haachama x=x y=y angle=angle icon=icon>
 
 		<span.scoreboard[fs:48px]>
-			<span id="global-counter"> "{globalScore}"
-		<span.scoreboard[fs:24px]> "{personalScore}"
+			<span id="global-counter"> "{globalScore.format!}"
+		<span.scoreboard[fs:24px]> "{personalScore.format!}"
 		<button @click=increment> "HAACHAMA!"
 

@@ -11,7 +11,7 @@ export class Store
 		const raw = #storage.getItem #key
 		BigInt raw or 0n
 
-	def toString
+	def format
 		formatter.format value
 
 
