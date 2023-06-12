@@ -20,10 +20,6 @@ app.use("/assets", express.static('app/assets/'))
 
 # catch-all route that returns our index.html
 app.get(/.*/) do(req,res)
-	# only render the html for requests that prefer an html response
-	unless req.accepts(['image/*', 'html']) == 'html'
-		return res.sendStatus(404)
-
 	res.send(index.body)
 
 # Express is set up and ready to go!
