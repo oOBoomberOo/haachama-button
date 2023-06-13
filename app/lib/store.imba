@@ -9,7 +9,14 @@ export class Store
 		#storage.setItem #key, value.toString!
 	get value
 		const raw = #storage.getItem #key
-		BigInt raw or 0n
+
+		if raw
+			parseInt raw
+		else
+			0
+	
+	get isMax
+		value >= Number.MAX_SAFE_INTEGER
 
 	def format
 		formatter.format value

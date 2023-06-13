@@ -18,7 +18,7 @@ export default class DistributedCounter
 		const next = await #count!
 
 		#counter = new CountUp #element, next, {
-			startVal: next,
+			startVal: Number(#target.value),
 			...options
 		}
 
@@ -28,11 +28,18 @@ export default class DistributedCounter
 		#timer = setInterval(&, refreshInterval) do
 			const next = await #count!
 			#counter.update next
+
+			if #target.value != next
+				imba.commit!
 	
 	def destroy
 		clearInterval #timer
 
 	def increment
+		if #target.value >= Number.MAX_SAFE_INTEGER
+			return
+
 		const next = await #increment!
+		#target.value = next
 		#counter..update next
 	

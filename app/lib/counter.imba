@@ -10,7 +10,7 @@ def parseCount response\Response
 		throw new Error(error)
 
 	const data = await response.json()
-	BigInt(data.count)
+	parseInt data.count
 
 def fetcher
 	try
@@ -42,10 +42,9 @@ export default tag Counter
 		counter.destroy!
 	
 	def increment
-		personalScore.value += 1n
+		personalScore.value += 1
 		await counter.increment!
 		haachama.add player.select!
-
 	
 	css ta:center
 		g:15px
@@ -68,19 +67,27 @@ export default tag Counter
 		bd:none
 		rd:15px
 		w:fit-content
-	css button@hover
-		cursor:pointer
-		bg:red6
-	css button@active
-		bg:red7
-		transform:translateY(2px)
-	
-	formatter = Intl.NumberFormat('en-US', { })
+	css .btn
+		@hover
+			cursor:pointer
+			bg:red6
+		@active
+			bg:red7
+			transform:translateY(2px)
+		@focus
+			bg:red8
+
+	css .disabled
+		bg:warm7
+		@hover
+			cursor:not-allowed
 	
 	css .scoreboard
 		m:0 p:0
 		c:var(--primary)
 		txs: 1px 1px var(--text), 1px -1px var(--text), -1px 1px var(--text), -1px -1px var(--text)
+
+	#initialGlobalScore = globalScore.format!
 
 	<self[c@suspended: red4]>
 		<global>
@@ -88,7 +95,13 @@ export default tag Counter
 				<Haachama x=x y=y angle=angle icon=icon>
 
 		<span.scoreboard[fs:48px]>
-			<span id="global-counter"> "{globalScore.format!}"
+			<span id="global-counter"> #initialGlobalScore
 		<span.scoreboard[fs:24px]> "{personalScore.format!}"
-		<button @click=increment> "HAACHAMA!"
+
+		if globalScore.isMax
+			<div[maw:60ch ta:center txs:1px 1px 5px black fs:1.2em]>
+				<p> "Congratulations, The counter has reached its maximum value!"
+				<p> "Assuming average click-per-second of 6.51 cps, we would've been clicking for the cumulative time of 43.87 million years!"
+
+		<button .btn=!globalScore.isMax .disabled=globalScore.isMax @click=increment disabled=globalScore.isMax> "HAACHAMA!"
 
