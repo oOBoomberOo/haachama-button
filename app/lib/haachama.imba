@@ -29,7 +29,6 @@ export class HaachamaSet
 
 	def add entry
 		const size = 256
-		const age = entry.duration * 1000
 
 		const x = random(0, window.innerWidth - size)
 		const y = random(0, window.innerHeight - size)
@@ -38,12 +37,14 @@ export class HaachamaSet
 
 		const data = { x, y, angle, icon }
 
-		content.add(data)
-		player.play(entry)
-
-		setTimeout(&, age) do
-			content.delete(data)
-			imba.commit!
+		try
+			await player.play entry, do
+				content.delete data
+				imba.commit!
+		catch e
+			console.warn `Failed to play entry`, e.message
+		finally
+			content.add data
 
 export def haachamaSet
 	new HaachamaSet!
