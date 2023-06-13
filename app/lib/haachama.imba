@@ -28,11 +28,11 @@ export class HaachamaSet
 		Math.random() * (max - min + 1) + min
 
 	def add entry
-		const size = 256
+		const size = 100
 
-		const x = random(0, window.innerWidth - size)
-		const y = random(0, window.innerHeight - size)
-		const angle = random(0, 360)
+		const x = random(-size, window.innerWidth - size)
+		const y = random(-size, window.innerHeight - size)
+		const angle = random(-360, 360)
 		const icon = entry.icon or "haachama"
 
 		const data = { x, y, angle, icon }

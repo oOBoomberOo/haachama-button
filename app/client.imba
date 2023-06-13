@@ -1,8 +1,11 @@
+import { DebugTool } from './lib/player'
 import { FocusToggle } from './lib/focus_toggle'
 import { MusicVideo } from './lib/music_video'
 import './assets/app.css'
 import './lib/music_video'
 import Counter from './lib/counter'
+
+const debug = false
 
 tag App
 	focused = false
@@ -55,6 +58,10 @@ tag App
 		<MusicVideo[flg:1] bind=focused>
 		<section.counter[pe:none]>
 			<Counter[zi:2 pe:all]>
+		
+		if debug
+			<DebugTool>
+
 		<footer[zi:1]>
 			<span.left-msg>
 				"Dedicated to our worldwide strongest idol: "
