@@ -1,4 +1,5 @@
 import express from 'express'
+import compression from 'compression'
 import index from './app/index.html'
 import api from "./server/api"
 
@@ -16,7 +17,7 @@ app.get("/sounds/:name") do(req,res)
 	const file = req.params.name
 	res.sendFile(`{__dirname}/app/assets/sounds/{file}.mp3`)
 
-app.use("/assets", express.static('app/assets/'))
+app.use("/assets", compression(), express.static('app/assets/'))
 
 # catch-all route that returns our index.html
 app.get(/.*/) do(req,res)
